@@ -51,6 +51,7 @@ const func = async () => {
     })
   }
   // この値を使って、web audio apiで周波数の音圧を金魚向けに変換する
+  // 魚の方が感度が低いので、音圧を下げる事になる。
   console.log(pressureDiff)
 }
 func()
