@@ -29,9 +29,11 @@ const handleFileChange = (event: Event) => {
     const arrayBuffer = e.target?.result
     if (!arrayBuffer || !audioContext.value) return
 
+    // ここで選択したファイルをwebauidoapi形式に変換している
     audioContext.value.decodeAudioData(
       arrayBuffer as ArrayBuffer,
       (buffer) => {
+        // デコードされたオーディオデータを格納する
         audioBuffer.value = buffer
       },
       (error) => {
@@ -52,7 +54,6 @@ const createFilter = () => {
 }
 
 const playAudio = () => {
-  debugger
   if (!audioContext.value || !audioBuffer.value) return
 
   if (state.sourceNode) {
@@ -84,7 +85,7 @@ const updateFilter = () => {
     state.gainNode.connect(audioContext.value!.destination)
   }
 }
-const isKingyo = ref(false)
+
 const clickKingyo = () => {
   state.isFilterOn = !state.isFilterOn
   updateFilter()
