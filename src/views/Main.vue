@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import KingyoImage from '@/assets/kingyo.jpg'
 import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
@@ -7,9 +7,11 @@ import YariikaImage from '@/assets/yariika.jpg'
 
 const audioContext = ref<AudioContext | null>(null)
 const audioBuffer = ref<AudioBuffer | null>(null)
-const state = ref({
+const state = reactive({
   isFilterOn: false,
-  sourceNode: null as AudioBufferSourceNode | null
+  sourceNode: null as AudioBufferSourceNode | null,
+  biquadFilter: null as BiquadFilterNode | null,
+  gainNode: null as GainNode | null
 })
 
 onMounted(() => {
@@ -41,50 +43,51 @@ const handleFileChange = (event: Event) => {
   reader.readAsArrayBuffer(file)
 }
 
+const createFilter = () => {
+  const biquadFilter = audioContext.value!.createBiquadFilter()
+  biquadFilter.type = 'bandpass'
+  biquadFilter.frequency.value = 1525
+  biquadFilter.Q.value = Math.sqrt(3000 / 50)
+  return biquadFilter
+}
+
 const playAudio = () => {
+  debugger
   if (!audioContext.value || !audioBuffer.value) return
 
-  if (state.value.sourceNode) {
-    state.value.sourceNode.disconnect()
-    state.value.sourceNode = null
+  if (state.sourceNode) {
+    state.sourceNode.disconnect()
+    state.sourceNode = null
   }
 
-  const source = audioContext.value.createBufferSource()
-  source.buffer = audioBuffer.value
-  state.value.sourceNode = source
+  state.sourceNode = audioContext.value.createBufferSource()
+  state.sourceNode.buffer = audioBuffer.value
 
-  // バンドパスフィルターを作成
-  if (state.value.isFilterOn) {
-    const biquadFilter = audioContext.value.createBiquadFilter()
-    biquadFilter.type = 'bandpass'
-    biquadFilter.frequency.value = 1525 // 中心周波数
-    biquadFilter.Q.value = Math.sqrt(3000 / 50) // 品質因子
+  state.gainNode = audioContext.value.createGain()
+  state.biquadFilter = createFilter()
 
-    // オーディオチェーンにフィルターを挿入
-    source.connect(biquadFilter)
-    biquadFilter.connect(audioContext.value.destination)
+  state.sourceNode.connect(state.gainNode)
+  updateFilter()
+
+  state.gainNode.connect(audioContext.value.destination)
+  state.sourceNode.start(0)
+}
+
+const updateFilter = () => {
+  if (!state.biquadFilter || !state.gainNode) return
+
+  state.gainNode.disconnect()
+  if (state.isFilterOn) {
+    state.gainNode.connect(state.biquadFilter)
+    state.biquadFilter.connect(audioContext.value!.destination)
   } else {
-    source.connect(audioContext.value.destination)
+    state.gainNode.connect(audioContext.value!.destination)
   }
-
-  source.start(0)
 }
-
-const stopAudio = () => {
-  // audioContextから音声を停止
-  audioContext.value?.suspend()
-}
-
-const forwardAudio = () => {
-  if (!audioBuffer.value) return
-  startOffset += 5
-  playAudio()
-}
-
 const isKingyo = ref(false)
 const clickKingyo = () => {
-  state.value.isFilterOn = !state.value.isFilterOn
-  playAudio()
+  state.isFilterOn = !state.isFilterOn
+  updateFilter()
 }
 </script>
 
@@ -114,8 +117,6 @@ const clickKingyo = () => {
   <p>プレイヤー</p>
   <div>
     <button @click="playAudio">再生</button>
-    <button @click="stopAudio">停止</button>
-    <button @click="forwardAudio">5s 進む</button>
   </div>
 </template>
 
