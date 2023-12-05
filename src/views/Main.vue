@@ -1,40 +1,90 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import KingyoImage from '@/assets/kingyo.jpg'
 import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
 
-const audio = ref<HTMLAudioElement | null>(null)
+const audioContext = ref<AudioContext | null>(null)
+const audioBuffer = ref<AudioBuffer | null>(null)
+const state = ref({
+  isFilterOn: false,
+  sourceNode: null as AudioBufferSourceNode | null
+})
+
+onMounted(() => {
+  audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
+})
 
 const handleFileChange = (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (file && file.type.startsWith('audio')) {
-    const audioUrl = URL.createObjectURL(file)
-    audio.value = new Audio(audioUrl)
-  } else {
-    alert('Please select an audio file.')
+  const fileInput = event.target as HTMLInputElement
+  if (!fileInput.files?.length) return
+
+  const file = fileInput.files[0]
+  const reader = new FileReader()
+
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    const arrayBuffer = e.target?.result
+    if (!arrayBuffer || !audioContext.value) return
+
+    audioContext.value.decodeAudioData(
+      arrayBuffer as ArrayBuffer,
+      (buffer) => {
+        audioBuffer.value = buffer
+      },
+      (error) => {
+        console.error('Error decoding audio data', error)
+      }
+    )
   }
+
+  reader.readAsArrayBuffer(file)
 }
 
 const playAudio = () => {
-  audio.value?.play()
+  if (!audioContext.value || !audioBuffer.value) return
+
+  if (state.value.sourceNode) {
+    state.value.sourceNode.disconnect()
+    state.value.sourceNode = null
+  }
+
+  const source = audioContext.value.createBufferSource()
+  source.buffer = audioBuffer.value
+  state.value.sourceNode = source
+
+  // バンドパスフィルターを作成
+  if (state.value.isFilterOn) {
+    const biquadFilter = audioContext.value.createBiquadFilter()
+    biquadFilter.type = 'bandpass'
+    biquadFilter.frequency.value = 1525 // 中心周波数
+    biquadFilter.Q.value = Math.sqrt(3000 / 50) // 品質因子
+
+    // オーディオチェーンにフィルターを挿入
+    source.connect(biquadFilter)
+    biquadFilter.connect(audioContext.value.destination)
+  } else {
+    source.connect(audioContext.value.destination)
+  }
+
+  source.start(0)
 }
 
 const stopAudio = () => {
-  audio.value?.pause()
+  // audioContextから音声を停止
+  audioContext.value?.suspend()
 }
 
 const forwardAudio = () => {
-  if (audio.value) {
-    audio.value.currentTime += 5
-  }
+  if (!audioBuffer.value) return
+  startOffset += 5
+  playAudio()
 }
 
-const backAudio = () => {
-  if (audio.value) {
-    audio.value.currentTime -= 5
-  }
+const isKingyo = ref(false)
+const clickKingyo = () => {
+  state.value.isFilterOn = !state.value.isFilterOn
+  playAudio()
 }
 </script>
 
@@ -51,7 +101,7 @@ const backAudio = () => {
     <button class="image-button" style="width: 25%">
       <img :src="HumanImage" />
     </button>
-    <button class="image-button" style="width: 25%">
+    <button class="image-button" style="width: 25%" @click="clickKingyo">
       <img :src="KingyoImage" />
     </button>
     <button class="image-button" style="width: 25%">
@@ -66,7 +116,6 @@ const backAudio = () => {
     <button @click="playAudio">再生</button>
     <button @click="stopAudio">停止</button>
     <button @click="forwardAudio">5s 進む</button>
-    <button @click="backAudio">5s 戻る</button>
   </div>
 </template>
 
