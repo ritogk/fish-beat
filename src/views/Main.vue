@@ -1,14 +1,47 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import KingyoImage from '@/assets/kingyo.jpg'
 import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
+
+const audio = ref<HTMLAudioElement | null>(null)
+
+const handleFileChange = (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (file && file.type.startsWith('audio')) {
+    const audioUrl = URL.createObjectURL(file)
+    audio.value = new Audio(audioUrl)
+  } else {
+    alert('Please select an audio file.')
+  }
+}
+
+const playAudio = () => {
+  audio.value?.play()
+}
+
+const stopAudio = () => {
+  audio.value?.pause()
+}
+
+const forwardAudio = () => {
+  if (audio.value) {
+    audio.value.currentTime += 5
+  }
+}
+
+const backAudio = () => {
+  if (audio.value) {
+    audio.value.currentTime -= 5
+  }
+}
 </script>
 
 <template>
   <p>音声ファイル選択</p>
   <div>
-    <input type="file" />
+    <input type="file" @change="handleFileChange" accept="audio/*" />
     <button>サンプル1</button>
     <button>サンプル2</button>
     <button>サンプル3</button>
@@ -30,9 +63,10 @@ import YariikaImage from '@/assets/yariika.jpg'
   </div>
   <p>プレイヤー</p>
   <div>
-    <button>再生</button>
-    <button>停止</button>
-    <button>はじめから</button>
+    <button @click="playAudio">再生</button>
+    <button @click="stopAudio">停止</button>
+    <button @click="forwardAudio">5s 進む</button>
+    <button @click="backAudio">5s 戻る</button>
   </div>
 </template>
 
