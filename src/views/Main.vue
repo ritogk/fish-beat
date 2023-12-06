@@ -100,7 +100,7 @@ const backAudio = () => {
 }
 
 const updateFilter = () => {
-  if (!state.biquadFilter || !state.gainNode) return
+  if (!state.biquadFilter || !state.gainNode || !audioContext.value) return
 
   state.gainNode.disconnect()
   if (state.isFilterOn) {
