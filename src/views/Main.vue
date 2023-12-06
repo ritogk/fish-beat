@@ -5,12 +5,17 @@ import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
 
+// web audio apiの中心的な存在。AudioContextから様々な値を生成する
 const audioContext = ref<AudioContext | null>(null)
+// 音の生データ
 const audioBuffer = ref<AudioBuffer | null>(null)
 const state = reactive({
   isFilterOn: false,
+  // 音声ファイルの再生状態を管理する
   sourceNode: null as AudioBufferSourceNode | null,
+  // フィルターをかけるためのノード
   biquadFilter: null as BiquadFilterNode | null,
+  // 音量を調整するためのノード
   gainNode: null as GainNode | null,
   startTime: 0,
   startOffset: 0
@@ -18,6 +23,7 @@ const state = reactive({
 
 const handleFileChange = (event: Event) => {
   if (!audioContext.value) {
+    // web audio apiの初期化。ユーザー操作を回して行わないとブラウザで警告がでる。
     audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
   }
 
@@ -25,13 +31,15 @@ const handleFileChange = (event: Event) => {
   if (!fileInput.files?.length) return
 
   const file = fileInput.files[0]
+  // メモリに格納しているblobにアクセスするためのオブジェクト
   const reader = new FileReader()
 
+  // メモリから音声ファイルを取得
   reader.onload = (e: ProgressEvent<FileReader>) => {
     const arrayBuffer = e.target?.result
     if (!arrayBuffer || !audioContext.value) return
 
-    // ここで選択したファイルをwebauidoapi形式に変換している
+    // ファイル選択した音声ファイルをweb audio apiで扱える形式に変換
     audioContext.value.decodeAudioData(
       arrayBuffer as ArrayBuffer,
       (buffer) => {
@@ -43,7 +51,6 @@ const handleFileChange = (event: Event) => {
       }
     )
   }
-
   reader.readAsArrayBuffer(file)
 }
 
@@ -59,17 +66,23 @@ const playAudio = () => {
   if (!audioContext.value || !audioBuffer.value) return
 
   if (state.sourceNode) {
+    // BufferSourceNodeに紐づいているノードを切断
     state.sourceNode.disconnect()
+    // リソースの開放
     state.sourceNode = null
   }
 
+  // 初期化
   state.sourceNode = audioContext.value.createBufferSource()
+  // 音声データを紐づける
   state.sourceNode.buffer = audioBuffer.value
 
+  // GainNodeを作成し紐付ける
   state.gainNode = audioContext.value.createGain()
+  state.sourceNode.connect(state.gainNode)
+
   state.biquadFilter = createFilter()
 
-  state.sourceNode.connect(state.gainNode)
   updateFilter()
 
   state.startTime = audioContext.value.currentTime
@@ -115,6 +128,11 @@ const clickKingyo = () => {
   state.isFilterOn = !state.isFilterOn
   updateFilter()
 }
+
+const clickTest = () => {
+  state.biquadFilter?.disconnect()
+  state.gainNode?.connect(audioContext.value!.destination)
+}
 </script>
 
 <template>
@@ -127,7 +145,7 @@ const clickKingyo = () => {
   </div>
   <p>最適化種別</p>
   <div>
-    <button class="image-button" style="width: 25%">
+    <button class="image-button" style="width: 25%" @click="clickTest">
       <img :src="HumanImage" />
     </button>
     <button class="image-button" style="width: 25%" @click="clickKingyo">
