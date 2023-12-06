@@ -48,7 +48,7 @@ const initNode = () => {
   state.gainNode.connect(audioContext.value.destination)
 }
 
-const updateConnect = () => {
+const updateNode = () => {
   if (!state.biquadFilter || !state.gainNode) return
 
   // Gainの下に紐づくNodeを更新する
@@ -122,7 +122,7 @@ const backAudio = () => {
 
 const clickKingyo = () => {
   state.isFilterOn = !state.isFilterOn
-  updateConnect()
+  updateNode()
 }
 
 const clickTest = () => {
