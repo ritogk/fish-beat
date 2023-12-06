@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 import KingyoImage from '@/assets/kingyo.jpg'
 import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
@@ -12,14 +12,15 @@ const state = reactive({
   sourceNode: null as AudioBufferSourceNode | null,
   biquadFilter: null as BiquadFilterNode | null,
   gainNode: null as GainNode | null,
-  pauseTime: 0
-})
-
-onMounted(() => {
-  audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
+  startTime: 0,
+  startOffset: 0
 })
 
 const handleFileChange = (event: Event) => {
+  if (!audioContext.value) {
+    audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
+  }
+
   const fileInput = event.target as HTMLInputElement
   if (!fileInput.files?.length) return
 
@@ -71,18 +72,33 @@ const playAudio = () => {
   state.sourceNode.connect(state.gainNode)
   updateFilter()
 
-  state.gainNode.connect(audioContext.value.destination)
-  state.sourceNode.start(0, state.pauseTime)
+  state.startTime = audioContext.value.currentTime
+  state.sourceNode.start(0, state.startOffset % audioBuffer.value.duration)
 }
 
-const stopAudio = () => {
-  if (!audioContext.value || !audioBuffer.value) return
-  if (!state.sourceNode) return
+const pauseAudio = () => {
+  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
   state.sourceNode.stop(0)
-  state.sourceNode.disconnect()
-  state.sourceNode = null
-  state.pauseTime = audioContext.value.currentTime
+  state.startOffset += audioContext.value.currentTime - state.startTime
 }
+
+// 5s進める
+const forwardAudio = () => {
+  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
+  state.startOffset += 5
+  pauseAudio()
+  playAudio()
+}
+
+// 5s戻す
+const backAudio = () => {
+  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
+  state.startOffset -= 5
+  if (state.startOffset < 0) state.startOffset = 0
+  pauseAudio()
+  playAudio()
+}
+
 const updateFilter = () => {
   if (!state.biquadFilter || !state.gainNode) return
 
@@ -127,7 +143,9 @@ const clickKingyo = () => {
   <p>プレイヤー</p>
   <div>
     <button @click="playAudio">再生</button>
-    <button @click="stopAudio">停止</button>
+    <button @click="pauseAudio">停止</button>
+    <button @click="forwardAudio">5秒進む</button>
+    <button @click="backAudio">5秒戻る</button>
   </div>
 </template>
 
