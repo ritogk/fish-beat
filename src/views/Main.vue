@@ -11,7 +11,8 @@ const state = reactive({
   isFilterOn: false,
   sourceNode: null as AudioBufferSourceNode | null,
   biquadFilter: null as BiquadFilterNode | null,
-  gainNode: null as GainNode | null
+  gainNode: null as GainNode | null,
+  pauseTime: 0
 })
 
 onMounted(() => {
@@ -71,9 +72,17 @@ const playAudio = () => {
   updateFilter()
 
   state.gainNode.connect(audioContext.value.destination)
-  state.sourceNode.start(0)
+  state.sourceNode.start(0, state.pauseTime)
 }
 
+const stopAudio = () => {
+  if (!audioContext.value || !audioBuffer.value) return
+  if (!state.sourceNode) return
+  state.sourceNode.stop(0)
+  state.sourceNode.disconnect()
+  state.sourceNode = null
+  state.pauseTime = audioContext.value.currentTime
+}
 const updateFilter = () => {
   if (!state.biquadFilter || !state.gainNode) return
 
@@ -118,6 +127,7 @@ const clickKingyo = () => {
   <p>プレイヤー</p>
   <div>
     <button @click="playAudio">再生</button>
+    <button @click="stopAudio">停止</button>
   </div>
 </template>
 
