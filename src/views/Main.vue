@@ -5,6 +5,14 @@ import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
 
+const createFilter = () => {
+  const biquadFilter = audioContext.value!.createBiquadFilter()
+  biquadFilter.type = 'bandpass'
+  biquadFilter.frequency.value = 1525
+  biquadFilter.Q.value = Math.sqrt(3000 / 50)
+  return biquadFilter
+}
+
 // web audio apiの中心的な存在。AudioContextから様々な値を生成する
 const audioContext = ref<AudioContext>(new (window.AudioContext || window.webkitAudioContext)())
 // 音の生データ
@@ -14,12 +22,45 @@ const state = reactive({
   // 音声ファイルの再生状態を管理する
   sourceNode: null as AudioBufferSourceNode | null,
   // フィルターをかけるためのノード
-  biquadFilter: null as BiquadFilterNode | null,
+  biquadFilter: createFilter(),
   // 音量を調整するためのノード
   gainNode: null as GainNode | null,
   startTime: 0,
   startOffset: 0
 })
+
+// ノードの初期化
+const initNode = () => {
+  if (state.sourceNode) {
+    // BufferSourceNodeに紐づいているノードを切断
+    state.sourceNode.disconnect()
+    // リソースの開放
+    state.sourceNode = null
+  }
+  // 初期化
+  state.sourceNode = audioContext.value.createBufferSource()
+  // 音声データを紐づける
+  state.sourceNode.buffer = audioBuffer.value
+  // Gainノードを紐付ける
+  state.gainNode = audioContext.value.createGain()
+  state.sourceNode.connect(state.gainNode)
+  // スピーカーと紐付ける。
+  state.gainNode.connect(audioContext.value.destination)
+}
+
+const updateConnect = () => {
+  if (!state.biquadFilter || !state.gainNode || !audioContext.value) return
+
+  // Gainの下に紐づくNodeを更新する
+  state.gainNode.disconnect()
+
+  if (state.isFilterOn) {
+    state.gainNode.connect(state.biquadFilter)
+    state.biquadFilter.connect(audioContext.value!.destination)
+  } else {
+    state.gainNode.connect(audioContext.value!.destination)
+  }
+}
 
 const handleFileChange = (event: Event) => {
   const fileInput = event.target as HTMLInputElement
@@ -49,37 +90,9 @@ const handleFileChange = (event: Event) => {
   reader.readAsArrayBuffer(file)
 }
 
-const createFilter = () => {
-  const biquadFilter = audioContext.value!.createBiquadFilter()
-  biquadFilter.type = 'bandpass'
-  biquadFilter.frequency.value = 1525
-  biquadFilter.Q.value = Math.sqrt(3000 / 50)
-  return biquadFilter
-}
-
 const playAudio = () => {
-  if (!audioContext.value || !audioBuffer.value) return
-
-  if (state.sourceNode) {
-    // BufferSourceNodeに紐づいているノードを切断
-    state.sourceNode.disconnect()
-    // リソースの開放
-    state.sourceNode = null
-  }
-
-  // 初期化
-  state.sourceNode = audioContext.value.createBufferSource()
-  // 音声データを紐づける
-  state.sourceNode.buffer = audioBuffer.value
-
-  // GainNodeを作成し紐付ける
-  state.gainNode = audioContext.value.createGain()
-  state.sourceNode.connect(state.gainNode)
-
-  state.biquadFilter = createFilter()
-
-  updateFilter()
-
+  initNode()
+  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
   state.startTime = audioContext.value.currentTime
   state.sourceNode.start(0, state.startOffset % audioBuffer.value.duration)
 }
@@ -107,21 +120,9 @@ const backAudio = () => {
   playAudio()
 }
 
-const updateFilter = () => {
-  if (!state.biquadFilter || !state.gainNode || !audioContext.value) return
-
-  state.gainNode.disconnect()
-  if (state.isFilterOn) {
-    state.gainNode.connect(state.biquadFilter)
-    state.biquadFilter.connect(audioContext.value!.destination)
-  } else {
-    state.gainNode.connect(audioContext.value!.destination)
-  }
-}
-
 const clickKingyo = () => {
   state.isFilterOn = !state.isFilterOn
-  updateFilter()
+  updateConnect()
 }
 
 const clickTest = () => {
