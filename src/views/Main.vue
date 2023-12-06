@@ -6,7 +6,7 @@ import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
 
 const createFilter = () => {
-  const biquadFilter = audioContext.value!.createBiquadFilter()
+  const biquadFilter = audioContext.value.createBiquadFilter()
   biquadFilter.type = 'bandpass'
   biquadFilter.frequency.value = 1525
   biquadFilter.Q.value = Math.sqrt(3000 / 50)
@@ -49,16 +49,16 @@ const initNode = () => {
 }
 
 const updateConnect = () => {
-  if (!state.biquadFilter || !state.gainNode || !audioContext.value) return
+  if (!state.biquadFilter || !state.gainNode) return
 
   // Gainの下に紐づくNodeを更新する
   state.gainNode.disconnect()
 
   if (state.isFilterOn) {
     state.gainNode.connect(state.biquadFilter)
-    state.biquadFilter.connect(audioContext.value!.destination)
+    state.biquadFilter.connect(audioContext.value.destination)
   } else {
-    state.gainNode.connect(audioContext.value!.destination)
+    state.gainNode.connect(audioContext.value.destination)
   }
 }
 
@@ -73,7 +73,7 @@ const handleFileChange = (event: Event) => {
   // メモリから音声ファイルを取得
   reader.onload = (e: ProgressEvent<FileReader>) => {
     const arrayBuffer = e.target?.result
-    if (!arrayBuffer || !audioContext.value) return
+    if (!arrayBuffer) return
 
     // ファイル選択した音声ファイルをweb audio apiで扱える形式に変換
     audioContext.value.decodeAudioData(
@@ -92,20 +92,20 @@ const handleFileChange = (event: Event) => {
 
 const playAudio = () => {
   initNode()
-  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
+  if (!audioBuffer.value || !state.sourceNode) return
   state.startTime = audioContext.value.currentTime
   state.sourceNode.start(0, state.startOffset % audioBuffer.value.duration)
 }
 
 const pauseAudio = () => {
-  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
+  if (!audioBuffer.value || !state.sourceNode) return
   state.sourceNode.stop(0)
   state.startOffset += audioContext.value.currentTime - state.startTime
 }
 
 // 5s進める
 const forwardAudio = () => {
-  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
+  if (!audioBuffer.value || !state.sourceNode) return
   state.startOffset += 5
   pauseAudio()
   playAudio()
@@ -113,7 +113,7 @@ const forwardAudio = () => {
 
 // 5s戻す
 const backAudio = () => {
-  if (!audioContext.value || !audioBuffer.value || !state.sourceNode) return
+  if (!audioBuffer.value || !state.sourceNode) return
   state.startOffset -= 5
   if (state.startOffset < 0) state.startOffset = 0
   pauseAudio()
@@ -127,7 +127,7 @@ const clickKingyo = () => {
 
 const clickTest = () => {
   state.biquadFilter?.disconnect()
-  state.gainNode?.connect(audioContext.value!.destination)
+  state.gainNode?.connect(audioContext.value.destination)
 }
 </script>
 
