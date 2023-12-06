@@ -6,7 +6,7 @@ import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
 
 // web audio apiの中心的な存在。AudioContextから様々な値を生成する
-const audioContext = ref<AudioContext | null>(null)
+const audioContext = ref<AudioContext>(new (window.AudioContext || window.webkitAudioContext)())
 // 音の生データ
 const audioBuffer = ref<AudioBuffer | null>(null)
 const state = reactive({
@@ -22,11 +22,6 @@ const state = reactive({
 })
 
 const handleFileChange = (event: Event) => {
-  if (!audioContext.value) {
-    // web audio apiの初期化。ユーザー操作を回して行わないとブラウザで警告がでる。
-    audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
-  }
-
   const fileInput = event.target as HTMLInputElement
   if (!fileInput.files?.length) return
 
