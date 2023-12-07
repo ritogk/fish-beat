@@ -8,6 +8,7 @@ import { type AudioManagerType, audioManagerKey, type FilerNm } from './audio-ma
 
 const audioManager = inject(audioManagerKey) as AudioManagerType
 
+const loaded = audioManager.subscription.loaded
 const selectedAnimal = ref<FilerNm>('人間')
 const clickHuman = () => {
   selectedAnimal.value = '人間'
@@ -33,19 +34,43 @@ const clickYariika = () => {
 <template>
   <h3>最適化する動物</h3>
   <div class="animal-area">
-    <button class="image-button" style="width: 25%" @click="clickHuman">
+    <button
+      class="image-button"
+      style="width: 25%"
+      @click="clickHuman"
+      :class="selectedAnimal === '人間' ? 'selected-button' : ''"
+      :disabled="!loaded"
+    >
       <img :src="HumanImage" />
       <span>人間</span>
     </button>
-    <button class="image-button" style="width: 25%" @click="clickKingyo">
+    <button
+      class="image-button"
+      style="width: 25%"
+      @click="clickKingyo"
+      :class="selectedAnimal === '金魚' ? 'selected-button' : ''"
+      :disabled="!loaded"
+    >
       <img :src="KingyoImage" />
       <span>金魚</span>
     </button>
-    <button class="image-button" style="width: 25%" @click="clickBuri">
+    <button
+      class="image-button"
+      style="width: 25%"
+      @click="clickBuri"
+      :class="selectedAnimal === 'ブリ' ? 'selected-button' : ''"
+      :disabled="!loaded"
+    >
       <img :src="BuriImage" />
       <span>ブリ</span>
     </button>
-    <button class="image-button" style="width: 25%" @click="clickYariika">
+    <button
+      class="image-button"
+      style="width: 25%"
+      @click="clickYariika"
+      :class="selectedAnimal === 'ヤリイカ' ? 'selected-button' : ''"
+      :disabled="!loaded"
+    >
       <img :src="YariikaImage" />
       <span>ヤリイカ</span>
     </button>
@@ -82,5 +107,9 @@ const clickYariika = () => {
 .image-button img {
   width: 100%;
   height: auto;
+}
+
+.selected-button {
+  filter: brightness(0.85);
 }
 </style>

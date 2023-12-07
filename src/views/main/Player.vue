@@ -4,6 +4,8 @@ import { type AudioManagerType, audioManagerKey } from './audio-manager'
 
 const audioManager = inject(audioManagerKey) as AudioManagerType
 
+const loaded = audioManager.subscription.loaded
+
 const playAudio = () => {
   audioManager.play()
 }
@@ -26,10 +28,14 @@ const backAudio = () => {
 <template>
   <div style="padding-left: 5%; padding-right: 5%">
     <div class="video-controls">
-      <button class="control-button" @click="playAudio">▶再生</button>
-      <button class="control-button" @click="pauseAudio">■停止</button>
-      <button class="control-button" @click="forwardAudio" id="forward">>>5秒</button>
-      <button class="control-button" @click="backAudio" id="rewind">&lt;&lt;5秒</button>
+      <button class="control-button" @click="playAudio" :disabled="!loaded">▶再生</button>
+      <button class="control-button" @click="pauseAudio" :disabled="!loaded">■停止</button>
+      <button class="control-button" @click="forwardAudio" id="forward" :disabled="!loaded">
+        >>5秒
+      </button>
+      <button class="control-button" @click="backAudio" id="rewind" :disabled="!loaded">
+        &lt;&lt;5秒
+      </button>
     </div>
     <div style="color: red">※端末の音量を15倍にして再生してください。</div>
   </div>

@@ -15,12 +15,13 @@ export type AudioManagerType = {
   changeFilter: (filterNm: FilerNm) => void
   subscription: {
     loading: ComputedRef<boolean>
+    loaded: ComputedRef<boolean>
   }
 }
 
 export class AudioManager implements AudioManagerType {
   private _audioContext = new (window.AudioContext || window.webkitAudioContext)()
-  private _audioBuffer: AudioBuffer | null = null
+  private _audioBuffer = ref<AudioBuffer | null>(null)
   private _sourceNode: AudioBufferSourceNode | null = null
   private _gainNode: GainNode | null = null
   private _startOffset = 0
@@ -40,7 +41,7 @@ export class AudioManager implements AudioManagerType {
       arrayBuffer as ArrayBuffer,
       (buffer) => {
         // デコードされたオーディオデータを格納する
-        this._audioBuffer = buffer
+        this._audioBuffer.value = buffer
         this._loading.value = false
       },
       (error) => {
@@ -60,7 +61,7 @@ export class AudioManager implements AudioManagerType {
     // 初期化
     this._sourceNode = this._audioContext.createBufferSource()
     // 音声データを紐づける
-    this._sourceNode.buffer = this._audioBuffer
+    this._sourceNode.buffer = this._audioBuffer.value
     // Gainノードを紐付ける
     this._gainNode = this._audioContext.createGain()
     this._sourceNode.connect(this._gainNode)
@@ -70,9 +71,9 @@ export class AudioManager implements AudioManagerType {
 
   play = () => {
     this.initNode()
-    if (!this._audioBuffer || !this._sourceNode) return
+    if (!this._audioBuffer || !this._sourceNode || !this._audioBuffer.value) return
     this._startTime = this._audioContext.currentTime
-    this._sourceNode.start(0, this._startOffset % this._audioBuffer.duration)
+    this._sourceNode.start(0, this._startOffset % this._audioBuffer.value.duration)
   }
   pause = () => {
     if (!this._audioBuffer || !this._sourceNode) return
@@ -164,7 +165,8 @@ export class AudioManager implements AudioManagerType {
     }
   }
   subscription = {
-    loading: computed(() => false)
+    loading: computed(() => this._loading.value),
+    loaded: computed(() => this._audioBuffer.value !== null)
   }
 }
 
