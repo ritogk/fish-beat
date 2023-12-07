@@ -22,7 +22,7 @@ const hundleFileChange = async (event: Event) => {
   reader.onload = (e: ProgressEvent<FileReader>) => {
     const arrayBuffer = e.target?.result
     if (!(arrayBuffer instanceof ArrayBuffer)) return
-    audioManagerState.audioBuffer = arrayBuffer
+    audioManagerState.changeAudio(arrayBuffer)
   }
   reader.readAsArrayBuffer(file)
 }
@@ -39,7 +39,7 @@ const clickSample = async () => {
   reader.onload = (e: ProgressEvent<FileReader>) => {
     const arrayBuffer = e.target?.result
     if (!(arrayBuffer instanceof ArrayBuffer)) return
-    audioManagerState.audioBuffer = arrayBuffer
+    audioManagerState.changeAudio(arrayBuffer)
   }
   reader.readAsArrayBuffer(file)
 }
@@ -73,7 +73,7 @@ const clickSample = async () => {
   color: black;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  width: 25%;
+  width: 35%;
 }
 
 .button:hover {

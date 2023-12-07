@@ -5,10 +5,9 @@ import { calculateSoundPressureLevelGain } from './audio-manager-state/gain-gene
 export type FilerNm = '人間' | '金魚' | 'ブリ' | 'ヤリイカ'
 
 export type AudioManagerStateType = {
-  set audioBuffer(arrayBuffer: ArrayBuffer)
+  changeAudio: (arrayBuffer: ArrayBuffer) => void
   set filterNm(filterNm: FilerNm)
   get audioContext(): AudioContext
-  initNode: () => void
   play: () => void
   pause: () => void
   forward: () => void
@@ -35,7 +34,7 @@ export class AudioManagerState implements AudioManagerStateType {
     })
   }
 
-  set audioBuffer(arrayBuffer: ArrayBuffer) {
+  changeAudio = (arrayBuffer: ArrayBuffer) => {
     this._loading.value = true
     // ファイル選択した音声ファイルをweb audio apiで扱える形式に変換
     this._audioContext.decodeAudioData(
@@ -43,6 +42,9 @@ export class AudioManagerState implements AudioManagerStateType {
       (buffer) => {
         // デコードされたオーディオデータを格納する
         this._audioBuffer.value = buffer
+        this._startTime = 0
+        this._startOffset = 0
+        this.initNode()
         this._loading.value = false
       },
       (error) => {
@@ -59,7 +61,7 @@ export class AudioManagerState implements AudioManagerStateType {
     return this._audioContext
   }
 
-  initNode = () => {
+  private initNode = () => {
     if (this._sourceNode) {
       // BufferSourceNodeに紐づいているノードを切断
       this._sourceNode.disconnect()
