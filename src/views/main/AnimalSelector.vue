@@ -4,9 +4,13 @@ import KingyoImage from '@/assets/kingyo.jpg'
 import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
-import { type AudioManagerType, audioManagerKey, type FilerNm } from './audio-manager'
+import {
+  type AudioManagerStateType,
+  audioManagerStateKey,
+  type FilerNm
+} from './audio-manager-state'
 
-const audioManager = inject(audioManagerKey) as AudioManagerType
+const audioManager = inject(audioManagerStateKey) as AudioManagerStateType
 
 const selectedAnimal = ref<FilerNm>('人間')
 const clickHuman = () => {
@@ -108,3 +112,4 @@ const clickYariika = () => {
   filter: brightness(0.85);
 }
 </style>
+./audioManagereState

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import { audioManagerKey, type AudioManagerType } from './audio-manager'
-const audioManager = inject(audioManagerKey) as AudioManagerType
+import { audioManagerStateKey, type AudioManagerStateType } from './audio-manager-state'
+const audioManagerState = inject(audioManagerStateKey) as AudioManagerStateType
 
 const elements = {
   file: ref<HTMLInputElement | null>(null)
@@ -22,7 +22,7 @@ const hundleFileChange = async (event: Event) => {
   reader.onload = (e: ProgressEvent<FileReader>) => {
     const arrayBuffer = e.target?.result
     if (!(arrayBuffer instanceof ArrayBuffer)) return
-    audioManager.audioBuffer = arrayBuffer
+    audioManagerState.audioBuffer = arrayBuffer
   }
   reader.readAsArrayBuffer(file)
 }
@@ -39,7 +39,7 @@ const clickSample = async () => {
   reader.onload = (e: ProgressEvent<FileReader>) => {
     const arrayBuffer = e.target?.result
     if (!(arrayBuffer instanceof ArrayBuffer)) return
-    audioManager.audioBuffer = arrayBuffer
+    audioManagerState.audioBuffer = arrayBuffer
   }
   reader.readAsArrayBuffer(file)
 }
@@ -85,3 +85,4 @@ const clickSample = async () => {
   cursor: default;
 }
 </style>
+./audioManagereState

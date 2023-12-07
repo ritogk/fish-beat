@@ -1,10 +1,10 @@
 import { ref, computed, type ComputedRef, type InjectionKey, watch } from 'vue'
-import { reactionFrequencyAnimals } from '@/views/main/reaction-frequency-animals'
-import { calculateSoundPressureLevelGain } from '@/views/main/gain-generater'
+import { reactionFrequencyAnimals } from './audio-manager-state/reaction-frequency-animals'
+import { calculateSoundPressureLevelGain } from './audio-manager-state/gain-generater'
 
 export type FilerNm = '人間' | '金魚' | 'ブリ' | 'ヤリイカ'
 
-export type AudioManagerType = {
+export type AudioManagerStateType = {
   set audioBuffer(arrayBuffer: ArrayBuffer)
   set filterNm(filterNm: FilerNm)
   get audioContext(): AudioContext
@@ -19,7 +19,7 @@ export type AudioManagerType = {
   }
 }
 
-export class AudioManager implements AudioManagerType {
+export class AudioManagerState implements AudioManagerStateType {
   private _audioContext = new (window.AudioContext || window.webkitAudioContext)()
   private _audioBuffer = ref<AudioBuffer | null>(null)
   private _sourceNode: AudioBufferSourceNode | null = null
@@ -181,4 +181,5 @@ export class AudioManager implements AudioManagerType {
   }
 }
 
-export const audioManagerKey: InjectionKey<AudioManagerType> = Symbol('AudioManagerType')
+export const audioManagerStateKey: InjectionKey<AudioManagerStateType> =
+  Symbol('AudioManagerStateType')

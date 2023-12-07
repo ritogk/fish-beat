@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { inject } from 'vue'
-import { type AudioManagerType, audioManagerKey } from './audio-manager'
+import { type AudioManagerStateType, audioManagerStateKey } from './audio-manager-state'
 
-const audioManager = inject(audioManagerKey) as AudioManagerType
+const audioManager = inject(audioManagerStateKey) as AudioManagerStateType
 
 const loaded = audioManager.subscription.loaded
 
@@ -72,3 +72,4 @@ const backAudio = () => {
   cursor: default;
 }
 </style>
+./audioManagereState

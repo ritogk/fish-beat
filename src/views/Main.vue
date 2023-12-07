@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { provide } from 'vue'
-import { AudioManager, audioManagerKey } from './main/audio-manager'
+import { AudioManagerState, audioManagerStateKey } from './main/audio-manager-state'
 import SongSelector from '@/views/main/SongSelector.vue'
 import AnimalSelector from '@/views/main/AnimalSelector.vue'
 import Player from '@/views/main/Player.vue'
 
-const audioManger = new AudioManager()
-provide(audioManagerKey, audioManger)
+const audioManagerState = new AudioManagerState()
+provide(audioManagerStateKey, audioManagerState)
 </script>
 
 <template>
@@ -21,3 +21,4 @@ provide(audioManagerKey, audioManger)
 </template>
 
 <style scoped></style>
+./main/audioManagereState
