@@ -199,55 +199,114 @@ const clickYariika = () => {
 </script>
 
 <template>
-  <p>音声ファイル選択</p>
-  <div>
-    <input type="file" @change="handleFileChange" accept="audio/*" />
-    <button>サンプル1</button>
-    <button>サンプル2</button>
-    <button>サンプル3</button>
-  </div>
-  <p>最適化種別</p>
-  <div>
-    <button class="image-button" style="width: 25%" @click="clickHuman">
-      <img :src="HumanImage" />
-      <span>人間</span>
-    </button>
-    <button class="image-button" style="width: 25%" @click="clickKingyo">
-      <img :src="KingyoImage" />
-      <span>金魚</span>
-    </button>
-    <button class="image-button" style="width: 25%" @click="clickBuri">
-      <img :src="BuriImage" />
-      <span>ブリ</span>
-    </button>
-    <button class="image-button" style="width: 25%" @click="clickYariika">
-      <img :src="YariikaImage" />
-      <span>ヤリイカ</span>
-    </button>
-  </div>
-  <p>プレイヤー</p>
-  <div>
-    <button @click="playAudio">再生</button>
-    <button @click="pauseAudio">停止</button>
-    <button @click="forwardAudio">5秒進む</button>
-    <button @click="backAudio">5秒戻る</button>
+  <div style="padding-left: 3%; padding-right: 3%; max-width: 1300px">
+    <h1 style="text-align: center">魚類に最適化した音楽プレイヤー</h1>
+    <h3>楽曲選択</h3>
+    <div style="border: black 1px">
+      <input type="file" @change="handleFileChange" accept="audio/*" />
+      <button>サンプル1</button>
+      <button>サンプル2</button>
+      <button>サンプル3</button>
+    </div>
+    <div class="video-controls">
+      <button class="control-button">+ 端末選択</button>
+      <button class="control-button">サンプル1を使う</button>
+      <button class="control-button">サンプル2を使う</button>
+      <button class="control-button">サンプル3を使う</button>
+    </div>
+    <hr size="1" color="#d5cecf" />
+    <h3>最適化する動物</h3>
+    <div class="animal-area">
+      <button class="image-button" style="width: 25%" @click="clickHuman">
+        <img :src="HumanImage" />
+        <span>人間</span>
+      </button>
+      <button class="image-button" style="width: 25%" @click="clickKingyo">
+        <img :src="KingyoImage" />
+        <span>金魚</span>
+      </button>
+      <button class="image-button" style="width: 25%" @click="clickBuri">
+        <img :src="BuriImage" />
+        <span>ブリ</span>
+      </button>
+      <button class="image-button" style="width: 25%" @click="clickYariika">
+        <img :src="YariikaImage" />
+        <span>ヤリイカ</span>
+      </button>
+    </div>
+    <hr size="1" color="#d5cecf" />
+    <div style="padding-left: 5%; padding-right: 5%">
+      <div class="video-controls">
+        <button class="control-button" @click="playAudio">▶再生</button>
+        <button class="control-button" @click="pauseAudio">■停止</button>
+        <button class="control-button" @click="forwardAudio" id="forward">>>5秒</button>
+        <button class="control-button" @click="backAudio" id="rewind">&lt;&lt;5秒</button>
+      </div>
+      <div style="color: red">※端末の音量を15倍にして再生してください。</div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.animal-area {
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 10px;
+}
 .image-button {
   display: inline;
   flex-direction: column;
   justify-content: center;
   padding: 10px;
-  border: 1px solid #ddd;
-  background-color: #f0f0f0;
+  border: 1px solid #37494c;
+  background-color: #e1e6e7;
   cursor: pointer;
+  border-radius: 15px;
+}
+
+.image-button:hover {
+  filter: brightness(0.9);
+}
+
+.image-button:disabled {
+  filter: brightness(0.7);
+  cursor: default;
 }
 
 .image-button img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
   height: auto;
+}
+
+.video-controls {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.control-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e1e6e7;
+  border: 1px solid #37494c;
+  font-size: 16px;
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 25%;
+}
+
+.control-button:hover {
+  filter: brightness(0.9);
+}
+
+.control-button:disabled {
+  filter: brightness(0.7);
+  cursor: default;
 }
 </style>
