@@ -26,16 +26,31 @@ const hundleFileChange = async (event: Event) => {
   }
   reader.readAsArrayBuffer(file)
 }
+
+const clickSample = async () => {
+  const sampleFilePath = './kimigayo.mp3' // サンプルファイルのパス
+  const response = await fetch(sampleFilePath)
+  const file = await response.blob()
+
+  // メモリに格納しているblobにアクセスするためのオブジェクト
+  const reader = new FileReader()
+
+  // メモリから音声ファイルを取得
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    const arrayBuffer = e.target?.result
+    if (!(arrayBuffer instanceof ArrayBuffer)) return
+    audioManager.audioBuffer = arrayBuffer
+  }
+  reader.readAsArrayBuffer(file)
+}
 </script>
 
 <template>
-  <h3>楽曲選択</h3>
+  <h3>楽曲</h3>
   <div class="area">
+    <button class="button" @click="clickSample">君が代</button>
     <button class="button" @click="clickFile">+ 端末選択</button>
     <input type="file" :ref="elements.file" @change="hundleFileChange" accept="audio/*" hidden />
-    <button class="button">サンプル1を使う</button>
-    <button class="button">サンプル2を使う</button>
-    <button class="button">サンプル3を使う</button>
   </div>
 </template>
 
