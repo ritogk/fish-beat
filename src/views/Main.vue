@@ -5,24 +5,20 @@ import HumanImage from '@/assets/human.jpg'
 import BuriImage from '@/assets/buri.jpg'
 import YariikaImage from '@/assets/yariika.jpg'
 
-const createFilter = () => {
-  const biquadFilter = audioContext.value.createBiquadFilter()
-  biquadFilter.type = 'bandpass'
-  biquadFilter.frequency.value = 1525
-  biquadFilter.Q.value = Math.sqrt(3000 / 50)
-  return biquadFilter
-}
+import { reactionFrequencyAnimals } from './main/reaction-frequency-animals'
+import { calculateSoundPressureLevelGain } from './main/gain-generater'
+
+const selectAnimal = ref('人間')
 
 // web audio apiの中心的な存在。AudioContextから様々な値を生成する
 const audioContext = ref<AudioContext>(new (window.AudioContext || window.webkitAudioContext)())
+
 // 音の生データ
 const audioBuffer = ref<AudioBuffer | null>(null)
 const state = reactive({
   isFilterOn: false,
   // 音声ファイルの再生状態を管理する
   sourceNode: null as AudioBufferSourceNode | null,
-  // フィルターをかけるためのノード
-  biquadFilter: createFilter(),
   // 音量を調整するためのノード
   gainNode: null as GainNode | null,
   startTime: 0,
@@ -49,14 +45,75 @@ const initNode = () => {
 }
 
 const updateNode = () => {
-  if (!state.biquadFilter || !state.gainNode) return
+  if (!state.gainNode) return
 
   // Gainの下に紐づくNodeを更新する
   state.gainNode.disconnect()
 
-  if (state.isFilterOn) {
-    state.gainNode.connect(state.biquadFilter)
-    state.biquadFilter.connect(audioContext.value.destination)
+  if (selectAnimal.value !== '人間') {
+    // 選択している動物を取得
+    // 人間の場合は加工せずに出力
+    // それ以外の場合はフィルターをかける
+
+    const humanReaction = reactionFrequencyAnimals.find((animal) => animal.name === '人間')
+    const targetReaction = reactionFrequencyAnimals.find(
+      (animal) => animal.name === selectAnimal.value
+    )
+    if (!humanReaction || !targetReaction) {
+      state.gainNode.connect(audioContext.value.destination)
+      return
+    }
+
+    // targetReaction.auditoryPressureのfrequencyの最小値を取得する
+    const minFrequency = targetReaction.auditoryPressure.reduce((prev, current) =>
+      prev.frequency < current.frequency ? prev : current
+    ).frequency
+    const maxFrequency = targetReaction.auditoryPressure.reduce((prev, current) =>
+      prev.frequency > current.frequency ? prev : current
+    ).frequency
+
+    // console.log(minFrequency)
+    // console.log(maxFrequency)
+
+    const biquadFilter = audioContext.value.createBiquadFilter()
+    biquadFilter.type = 'bandpass'
+    // 中心周波数とQ値を計算
+    const centerFrequency = Math.sqrt(minFrequency * maxFrequency)
+    const QValue = centerFrequency / (maxFrequency - minFrequency)
+
+    // フィルターのパラメータを設定
+    biquadFilter.frequency.value = centerFrequency
+    biquadFilter.Q.value = QValue
+    state.gainNode.connect(biquadFilter)
+    // biquadFilter.connect(audioContext.value.destination)
+
+    let lastNode = biquadFilter
+    for (const filterConfig of targetReaction.auditoryPressure) {
+      const filter = audioContext.value.createBiquadFilter()
+      // 人間との差分を計算
+      const humanAuditoryPressure = humanReaction.auditoryPressure.find(
+        (human) => human.frequency === filterConfig.frequency
+      )
+      if (!humanAuditoryPressure) {
+        biquadFilter.connect(audioContext.value.destination)
+        return
+      }
+
+      const gain = calculateSoundPressureLevelGain(humanAuditoryPressure.db, filterConfig.db)
+      console.log(
+        `frequency: ${filterConfig.frequency} db-up: ${filterConfig.db - humanAuditoryPressure.db}`
+      )
+      // 調整したgain
+      const adjustedGain = gain / 15
+      filter.type = 'peaking'
+      filter.frequency.value = filterConfig.frequency
+      // filter.gain.value = (filterConfig.db - humanAuditoryPressure.db) / 10
+      filter.gain.value = adjustedGain < 8 ? adjustedGain : 8
+      lastNode.connect(filter)
+      lastNode = filter
+    }
+
+    lastNode.connect(audioContext.value.destination)
   } else {
     state.gainNode.connect(audioContext.value.destination)
   }
@@ -120,14 +177,24 @@ const backAudio = () => {
   playAudio()
 }
 
-const clickKingyo = () => {
-  state.isFilterOn = !state.isFilterOn
+const clickHuman = () => {
+  selectAnimal.value = '人間'
   updateNode()
 }
 
-const clickTest = () => {
-  state.biquadFilter?.disconnect()
-  state.gainNode?.connect(audioContext.value.destination)
+const clickKingyo = () => {
+  selectAnimal.value = '金魚'
+  updateNode()
+}
+
+const clickBuri = () => {
+  selectAnimal.value = 'ブリ'
+  updateNode()
+}
+
+const clickYariika = () => {
+  selectAnimal.value = 'ヤリイカ'
+  updateNode()
 }
 </script>
 
@@ -141,16 +208,16 @@ const clickTest = () => {
   </div>
   <p>最適化種別</p>
   <div>
-    <button class="image-button" style="width: 25%" @click="clickTest">
+    <button class="image-button" style="width: 25%" @click="clickHuman">
       <img :src="HumanImage" />
     </button>
     <button class="image-button" style="width: 25%" @click="clickKingyo">
       <img :src="KingyoImage" />
     </button>
-    <button class="image-button" style="width: 25%">
+    <button class="image-button" style="width: 25%" @click="clickBuri">
       <img :src="BuriImage" />
     </button>
-    <button class="image-button" style="width: 25%">
+    <button class="image-button" style="width: 25%" @click="clickYariika">
       <img :src="YariikaImage" />
     </button>
   </div>
