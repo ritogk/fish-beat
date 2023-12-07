@@ -210,15 +210,19 @@ const clickYariika = () => {
   <div>
     <button class="image-button" style="width: 25%" @click="clickHuman">
       <img :src="HumanImage" />
+      <span>人間</span>
     </button>
     <button class="image-button" style="width: 25%" @click="clickKingyo">
       <img :src="KingyoImage" />
+      <span>金魚</span>
     </button>
     <button class="image-button" style="width: 25%" @click="clickBuri">
       <img :src="BuriImage" />
+      <span>ブリ</span>
     </button>
     <button class="image-button" style="width: 25%" @click="clickYariika">
       <img :src="YariikaImage" />
+      <span>ヤリイカ</span>
     </button>
   </div>
   <p>プレイヤー</p>
@@ -232,19 +236,18 @@ const clickYariika = () => {
 
 <style scoped>
 .image-button {
-  /* ボタンのスタイル設定 */
-  display: inline-flex; /* フレックスボックスを使用 */
-  align-items: center; /* 画像とテキストを中央揃え */
-  justify-content: center; /* 中央揃え */
-  padding: 10px; /* パディング */
-  border: 1px solid #ddd; /* 境界線 */
-  background-color: #f0f0f0; /* 背景色 */
-  cursor: pointer; /* ポインター形式のカーソル */
+  display: inline;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f0f0f0;
+  cursor: pointer;
 }
 
 .image-button img {
-  max-width: 100%; /* ボタンの幅に合わせて最大100% */
-  max-height: 100%; /* ボタンの高さに合わせて最大100% */
-  height: auto; /* 高さを自動調整 */
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
 }
 </style>
