@@ -8,26 +8,25 @@ import { type AudioManagerType, audioManagerKey, type FilerNm } from './audio-ma
 
 const audioManager = inject(audioManagerKey) as AudioManagerType
 
-const loaded = audioManager.subscription.loaded
 const selectedAnimal = ref<FilerNm>('人間')
 const clickHuman = () => {
   selectedAnimal.value = '人間'
-  audioManager.changeFilter(selectedAnimal.value)
+  audioManager.filterNm = selectedAnimal.value
 }
 
 const clickKingyo = () => {
   selectedAnimal.value = '金魚'
-  audioManager.changeFilter(selectedAnimal.value)
+  audioManager.filterNm = selectedAnimal.value
 }
 
 const clickBuri = () => {
   selectedAnimal.value = 'ブリ'
-  audioManager.changeFilter(selectedAnimal.value)
+  audioManager.filterNm = selectedAnimal.value
 }
 
 const clickYariika = () => {
   selectedAnimal.value = 'ヤリイカ'
-  audioManager.changeFilter(selectedAnimal.value)
+  audioManager.filterNm = selectedAnimal.value
 }
 </script>
 
@@ -39,7 +38,6 @@ const clickYariika = () => {
       style="width: 25%"
       @click="clickHuman"
       :class="selectedAnimal === '人間' ? 'selected-button' : ''"
-      :disabled="!loaded"
     >
       <img :src="HumanImage" />
       <span>人間</span>
@@ -49,7 +47,6 @@ const clickYariika = () => {
       style="width: 25%"
       @click="clickKingyo"
       :class="selectedAnimal === '金魚' ? 'selected-button' : ''"
-      :disabled="!loaded"
     >
       <img :src="KingyoImage" />
       <span>金魚</span>
@@ -59,7 +56,6 @@ const clickYariika = () => {
       style="width: 25%"
       @click="clickBuri"
       :class="selectedAnimal === 'ブリ' ? 'selected-button' : ''"
-      :disabled="!loaded"
     >
       <img :src="BuriImage" />
       <span>ブリ</span>
@@ -69,7 +65,6 @@ const clickYariika = () => {
       style="width: 25%"
       @click="clickYariika"
       :class="selectedAnimal === 'ヤリイカ' ? 'selected-button' : ''"
-      :disabled="!loaded"
     >
       <img :src="YariikaImage" />
       <span>ヤリイカ</span>

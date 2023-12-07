@@ -1,4 +1,4 @@
-import { ref, computed, type ComputedRef, type InjectionKey } from 'vue'
+import { ref, computed, type ComputedRef, type InjectionKey, watch } from 'vue'
 import { reactionFrequencyAnimals } from '@/views/main/reaction-frequency-animals'
 import { calculateSoundPressureLevelGain } from '@/views/main/gain-generater'
 
@@ -6,13 +6,13 @@ export type FilerNm = '人間' | '金魚' | 'ブリ' | 'ヤリイカ'
 
 export type AudioManagerType = {
   set audioBuffer(arrayBuffer: ArrayBuffer)
+  set filterNm(filterNm: FilerNm)
   get audioContext(): AudioContext
   initNode: () => void
   play: () => void
   pause: () => void
   forward: () => void
   rewind: () => void
-  changeFilter: (filterNm: FilerNm) => void
   subscription: {
     loading: ComputedRef<boolean>
     loaded: ComputedRef<boolean>
@@ -27,11 +27,12 @@ export class AudioManager implements AudioManagerType {
   private _startOffset = 0
   private _startTime = 0
   private _loading = ref(false)
+  private _filterNm = ref<FilerNm>('人間')
 
-  constructor() {}
-
-  get audioContext(): AudioContext {
-    return this._audioContext
+  constructor() {
+    watch(this._filterNm, () => {
+      this.changeFilter()
+    })
   }
 
   set audioBuffer(arrayBuffer: ArrayBuffer) {
@@ -49,6 +50,13 @@ export class AudioManager implements AudioManagerType {
         this._loading.value = false
       }
     )
+  }
+
+  set filterNm(filterNm: FilerNm) {
+    this._filterNm.value = filterNm
+  }
+  get audioContext(): AudioContext {
+    return this._audioContext
   }
 
   initNode = () => {
@@ -71,6 +79,7 @@ export class AudioManager implements AudioManagerType {
 
   play = () => {
     this.initNode()
+    this.changeFilter()
     if (!this._audioBuffer || !this._sourceNode || !this._audioBuffer.value) return
     this._startTime = this._audioContext.currentTime
     this._sourceNode.start(0, this._startOffset % this._audioBuffer.value.duration)
@@ -94,15 +103,17 @@ export class AudioManager implements AudioManagerType {
     this.play()
   }
 
-  changeFilter = (filterNm: FilerNm) => {
+  changeFilter = () => {
     if (!this._gainNode) return
 
     // Gainの下に紐づくNodeを更新する
     this._gainNode.disconnect()
 
-    if (filterNm !== '人間') {
+    if (this._filterNm.value !== '人間') {
       const humanReaction = reactionFrequencyAnimals.find((animal) => animal.name === '人間')
-      const targetReaction = reactionFrequencyAnimals.find((animal) => animal.name === filterNm)
+      const targetReaction = reactionFrequencyAnimals.find(
+        (animal) => animal.name === this._filterNm.value
+      )
       if (!humanReaction || !targetReaction) {
         this._gainNode.connect(this._audioContext.destination)
         return
