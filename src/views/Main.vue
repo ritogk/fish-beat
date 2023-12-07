@@ -119,34 +119,6 @@ const updateNode = () => {
   }
 }
 
-const handleFileChange = (event: Event) => {
-  const fileInput = event.target as HTMLInputElement
-  if (!fileInput.files?.length) return
-
-  const file = fileInput.files[0]
-  // メモリに格納しているblobにアクセスするためのオブジェクト
-  const reader = new FileReader()
-
-  // メモリから音声ファイルを取得
-  reader.onload = (e: ProgressEvent<FileReader>) => {
-    const arrayBuffer = e.target?.result
-    if (!arrayBuffer) return
-
-    // ファイル選択した音声ファイルをweb audio apiで扱える形式に変換
-    audioContext.value.decodeAudioData(
-      arrayBuffer as ArrayBuffer,
-      (buffer) => {
-        // デコードされたオーディオデータを格納する
-        audioBuffer.value = buffer
-      },
-      (error) => {
-        console.error('Error decoding audio data', error)
-      }
-    )
-  }
-  reader.readAsArrayBuffer(file)
-}
-
 const playAudio = () => {
   initNode()
   if (!audioBuffer.value || !state.sourceNode) return
@@ -196,20 +168,50 @@ const clickYariika = () => {
   selectAnimal.value = 'ヤリイカ'
   updateNode()
 }
+
+const elements = {
+  file: ref<HTMLInputElement | null>(null)
+}
+const clickFile = () => {
+  elements.file.value?.click()
+}
+
+const hundleFileChange = async (event: Event) => {
+  const fileInput = event.target as HTMLInputElement
+  if (!fileInput.files?.length) return
+
+  const file = fileInput.files[0]
+  // メモリに格納しているblobにアクセスするためのオブジェクト
+  const reader = new FileReader()
+
+  // メモリから音声ファイルを取得
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    const arrayBuffer = e.target?.result
+    if (!arrayBuffer) return
+
+    // ファイル選択した音声ファイルをweb audio apiで扱える形式に変換
+    audioContext.value.decodeAudioData(
+      arrayBuffer as ArrayBuffer,
+      (buffer) => {
+        // デコードされたオーディオデータを格納する
+        audioBuffer.value = buffer
+      },
+      (error) => {
+        console.error('Error decoding audio data', error)
+      }
+    )
+  }
+  reader.readAsArrayBuffer(file)
+}
 </script>
 
 <template>
   <div style="padding-left: 3%; padding-right: 3%; max-width: 1300px">
     <h1 style="text-align: center">魚類に最適化した音楽プレイヤー</h1>
     <h3>楽曲選択</h3>
-    <div style="border: black 1px">
-      <input type="file" @change="handleFileChange" accept="audio/*" />
-      <button>サンプル1</button>
-      <button>サンプル2</button>
-      <button>サンプル3</button>
-    </div>
     <div class="video-controls">
-      <button class="control-button">+ 端末選択</button>
+      <button class="control-button" @click="clickFile">+ 端末選択</button>
+      <input type="file" :ref="elements.file" @change="hundleFileChange" accept="audio/*" hidden />
       <button class="control-button">サンプル1を使う</button>
       <button class="control-button">サンプル2を使う</button>
       <button class="control-button">サンプル3を使う</button>
