@@ -4,6 +4,7 @@ import { AudioManagerState, audioManagerStateKey } from './main/audio-manager-st
 import SongSelector from '@/views/main/SongSelector.vue'
 import AnimalSelector from '@/views/main/AnimalSelector.vue'
 import Player from '@/views/main/Player.vue'
+import Fotter from '@/views/main/Fotter.vue'
 
 const audioManagerState = new AudioManagerState()
 provide(audioManagerStateKey, audioManagerState)
@@ -17,6 +18,7 @@ provide(audioManagerStateKey, audioManagerState)
     <AnimalSelector />
     <hr size="1" color="#d5cecf" />
     <Player />
+    <Fotter></Fotter>
   </div>
 </template>
 
