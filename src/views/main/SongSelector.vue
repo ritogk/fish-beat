@@ -3,6 +3,7 @@ import { ref, inject } from 'vue'
 import { audioManagerStateKey, type AudioManagerStateType } from './audio-manager-state'
 const audioManagerState = inject(audioManagerStateKey) as AudioManagerStateType
 
+const selectedSong = ref<'kimigayo' | 'other'>('kimigayo')
 const elements = {
   file: ref<HTMLInputElement | null>(null)
 }
@@ -11,6 +12,7 @@ const clickFile = () => {
 }
 
 const hundleFileChange = async (event: Event) => {
+  selectedSong.value = 'other'
   const fileInput = event.target as HTMLInputElement
   if (!fileInput.files?.length) return
 
@@ -28,6 +30,7 @@ const hundleFileChange = async (event: Event) => {
 }
 
 const clickSample = async () => {
+  selectedSong.value = 'kimigayo'
   const sampleFilePath = './kimigayo.mp3' // サンプルファイルのパス
   const response = await fetch(sampleFilePath)
   const file = await response.blob()
@@ -43,13 +46,26 @@ const clickSample = async () => {
   }
   reader.readAsArrayBuffer(file)
 }
+clickSample()
 </script>
 
 <template>
   <h3>楽曲</h3>
   <div class="area">
-    <button class="button" @click="clickSample">君が代</button>
-    <button class="button" @click="clickFile">+ 端末選択</button>
+    <button
+      class="button"
+      @click="clickSample"
+      :class="selectedSong === 'kimigayo' ? 'selected-button' : ''"
+    >
+      君が代
+    </button>
+    <button
+      class="button"
+      @click="clickFile"
+      :class="selectedSong === 'other' ? 'selected-button' : ''"
+    >
+      + 端末選択
+    </button>
     <input type="file" :ref="elements.file" @change="hundleFileChange" accept="audio/*" hidden />
   </div>
 </template>
@@ -83,6 +99,10 @@ const clickSample = async () => {
 .button:disabled {
   filter: brightness(0.7);
   cursor: default;
+}
+
+.selected-button {
+  filter: brightness(0.85);
 }
 </style>
 ./audioManagereState

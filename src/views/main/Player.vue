@@ -37,7 +37,7 @@ const backAudio = () => {
         &lt;&lt;5秒
       </button>
     </div>
-    <div style="color: red">※端末の音量を15倍にして水の中に放り込んで再生してください。</div>
+    <div style="color: red">※端末の音量を15倍にてから再生してください。</div>
   </div>
 </template>
 
