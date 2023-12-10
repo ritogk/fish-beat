@@ -12,7 +12,7 @@ provide(audioManagerStateKey, audioManagerState)
 
 <template>
   <div style="padding-left: 3%; padding-right: 3%; max-width: 1300px">
-    <h1 style="text-align: center">魚類に最適化した音楽プレイヤー</h1>
+    <h1 style="text-align: center">魚類のための音楽プレイヤー</h1>
     <SongSelector />
     <hr size="1" color="#d5cecf" />
     <AnimalSelector />
