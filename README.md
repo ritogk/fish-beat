@@ -3,7 +3,8 @@
 ## 概要
 
 魚類のためのクソオーディオプレイヤーアプリ
-<img width="539" alt="image" src="https://github.com/ritogk/fish-beat/assets/72111956/eec62daf-bf12-4145-8c85-44591d75f308">
+<img width="539" alt="image" src="https://github.com/ritogk/fish-beat/assets/72111956/df9213aa-b82d-4b30-a4f9-d1bf421ae237">
+
 
 https://fish-beat.homisoftware.net/
 
