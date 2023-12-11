@@ -3,7 +3,7 @@
 <template>
   <div style="text-align: center; margin-top: 30px">
     <a class="link" href="https://github.com/ritogk/fish-beat">ソースコード</a> |
-    <a class="link" href="">技術記事</a>
+    <a class="link" href="https://zenn.dev/homing/articles/e4ea3fdbc90c1b">技術記事</a>
   </div>
 </template>
 
